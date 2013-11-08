@@ -1,12 +1,10 @@
 # Add a declarative step here for populating the DB with movies.
-movies_count = 0
-
 Given /the following movies exist/ do |movies_table|
   movies_table.hashes.each do |movie|
     # each returned element will be a hash whose key is the table header.
     # you should arrange to add that movie to the database here.
     Movie.create!(movie) 
-    movies_count += 1
+
   end
  # flunk "Unimplemented"
 end
@@ -14,12 +12,13 @@ end
 # Make sure that one string (regexp) occurs before or after another one
 #   on the same page
 
+
 Given /^(?:|I) am on (.+)$/ do |page_name|
   visit path_to(page_name)
 end
 
 
-When /I follow 'Movie Title'/ do |sort_choice|
+When /I follow (.*)/ do |sort_choice|
   if sort_choice == "Movie Title"
   click_on("title_header")
   elsif sort_choice == "Release Date"
@@ -27,19 +26,12 @@ When /I follow 'Movie Title'/ do |sort_choice|
   end
 end
 
-Then /I should see "(.*)" before "(.*)"/ do|e1, e2|
-  #  ensure that that e1 occurs before e2.
-  #  page.body is the entire content of the page as a string.
-  astring = page.body.to_s
-  if astring.index(e1)!= nil && astring.index(e2)!=nil
-    if astring.index(e1)< astring.index(e2)
-    else 
-      assert false, "jr_fail"
-    end
-  else 
-    assert false, "jr_fail"
-  end
+Then /I should see "(.*)" before "(.*)"/ do |e1, e2|
+  aString = page.body.to_s
+  aString.index(e1).should > aString.index(e2)
 end
+
+
 
 
 # Make it easier to express checking or unchecking several boxes at once
@@ -80,12 +72,13 @@ Then /^"(.*)" should not appear$/ do |title|
   end
 end
 
-Then /I should see none of the movies/ do
-  rows = page.all('#movies tr').length -1
-  assert rows == 0
+Then /I should see all of the movies/ do
+  rows = page.all('table#movies tbody tr').size
+  rows.should == Movie.all.size
 end
 
-Then /I should see all of the movies/ do
-rows = page.all('#movies tr').size -1
-assert rows == movies_count
-end
+#Then /I should see none of the movies/ do
+ # rows = page.all('table#movies tbody tr').size
+ # assert rows == 0
+#end
+
